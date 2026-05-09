@@ -31,6 +31,9 @@ bin/
 ### Environment Variables ###
 .env
 
+### Spring sensitive config ###
+src/main/resources/application.properties
+
 ### Maven ###
 target/
 
