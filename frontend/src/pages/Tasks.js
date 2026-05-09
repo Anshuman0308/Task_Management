@@ -73,6 +73,7 @@ export default function Tasks() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, []);
 
   const create = async form => {

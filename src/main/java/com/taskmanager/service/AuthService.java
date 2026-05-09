@@ -29,8 +29,8 @@ public class AuthService {
             throw new IllegalArgumentException("Email already registered");
         }
 
-        // Always assign MEMBER on signup — use promote endpoint to elevate
-        Role role = Role.MEMBER;
+        // First user gets ADMIN, all subsequent users get MEMBER
+        Role role = userRepository.count() == 0 ? Role.ADMIN : Role.MEMBER;
 
         User user = User.builder()
                 .name(request.getName())

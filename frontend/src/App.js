@@ -18,16 +18,6 @@ const isTokenValid = () => {
   }
 };
 
-const getRole = () => {
-  const token = localStorage.getItem('token');
-  if (!token) return null;
-  try {
-    return JSON.parse(atob(token.split('.')[1])).role || localStorage.getItem('role');
-  } catch {
-    return null;
-  }
-};
-
 const PrivateRoute = ({ children }) => {
   return isTokenValid() ? children : <Navigate to="/login" />;
 };
