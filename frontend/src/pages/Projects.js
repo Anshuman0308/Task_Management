@@ -34,7 +34,7 @@ function MemberModal({ projectId, onClose }) {
       await api.post(`/projects/${projectId}/members`, { email });
       setMsg('Member added!');
     } catch (e) {
-      setMsg(e.response?.data?.error || 'Error');
+      setMsg(e.response?.data?.error || 'Error adding member');
     }
   };
   return (
@@ -59,21 +59,42 @@ export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [showCreate, setShowCreate] = useState(false);
   const [memberModal, setMemberModal] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const role = localStorage.getItem('role');
 
-  const load = () => api.get('/projects').then(r => setProjects(r.data));
+  const load = async () => {
+    try {
+      setLoading(true);
+      const r = await api.get('/projects');
+      setProjects(r.data);
+    } catch {
+      setError('Failed to load projects');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => { load(); }, []);
 
   const create = async form => {
-    await api.post('/projects', form);
-    setShowCreate(false);
-    load();
+    try {
+      await api.post('/projects', form);
+      setShowCreate(false);
+      load();
+    } catch (e) {
+      setError(e.response?.data?.error || 'Failed to create project');
+    }
   };
 
   const del = async id => {
     if (window.confirm('Delete this project?')) {
-      await api.delete(`/projects/${id}`);
-      load();
+      try {
+        await api.delete(`/projects/${id}`);
+        load();
+      } catch {
+        setError('Failed to delete project');
+      }
     }
   };
 
@@ -87,30 +108,29 @@ export default function Projects() {
             <button className="btn btn-primary btn-sm" onClick={() => setShowCreate(true)}>+ New Project</button>
           )}
         </div>
-
-        {projects.length === 0
-          ? <p className="empty">No projects yet.</p>
-          : projects.map(p => (
-            <div className="card" key={p.id}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <h3>{p.name}</h3>
-                  <p style={{ color: '#666', fontSize: '0.88rem', marginTop: 4 }}>{p.description}</p>
-                  <p style={{ fontSize: '0.8rem', color: '#999', marginTop: 8 }}>
-                    Owner: {p.ownerEmail} &nbsp;·&nbsp; {p.memberCount} members &nbsp;·&nbsp; {p.taskCount} tasks
-                  </p>
-                </div>
-                {role === 'ADMIN' && (
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button className="btn btn-outline btn-sm" onClick={() => setMemberModal(p.id)}>+ Member</button>
-                    <button className="btn btn-danger btn-sm" onClick={() => del(p.id)}>Delete</button>
-                  </div>
-                )}
+        {loading && <p className="empty">Loading...</p>}
+        {error && <p className="error" style={{ marginBottom: '1rem' }}>{error}</p>}
+        {!loading && projects.length === 0 && !error && <p className="empty">No projects yet.</p>}
+        {projects.map(p => (
+          <div className="card" key={p.id}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <h3>{p.name}</h3>
+                <p style={{ color: '#666', fontSize: '0.88rem', marginTop: 4 }}>{p.description}</p>
+                <p style={{ fontSize: '0.8rem', color: '#999', marginTop: 8 }}>
+                  Owner: {p.ownerEmail} &nbsp;·&nbsp; {p.memberCount} members &nbsp;·&nbsp; {p.taskCount} tasks
+                </p>
               </div>
+              {role === 'ADMIN' && (
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button className="btn btn-outline btn-sm" onClick={() => setMemberModal(p.id)}>+ Member</button>
+                  <button className="btn btn-danger btn-sm" onClick={() => del(p.id)}>Delete</button>
+                </div>
+              )}
             </div>
-          ))}
+          </div>
+        ))}
       </div>
-
       {showCreate && <Modal onClose={() => setShowCreate(false)} onSave={create} />}
       {memberModal && <MemberModal projectId={memberModal} onClose={() => setMemberModal(null)} />}
     </>
