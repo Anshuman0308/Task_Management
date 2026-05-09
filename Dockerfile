@@ -4,6 +4,7 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 COPY src ./src
+COPY frontend ./frontend
 RUN mvn clean package -DskipTests
 
 # Stage 2 — Run
