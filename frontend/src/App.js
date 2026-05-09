@@ -7,12 +7,33 @@ import Tasks from './pages/Tasks';
 import Members from './pages/Members';
 import './index.css';
 
+const isTokenValid = () => {
+  const token = localStorage.getItem('token');
+  if (!token) return false;
+  try {
+    const { exp } = JSON.parse(atob(token.split('.')[1]));
+    return exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+};
+
+const getRole = () => {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  try {
+    return JSON.parse(atob(token.split('.')[1])).role || localStorage.getItem('role');
+  } catch {
+    return null;
+  }
+};
+
 const PrivateRoute = ({ children }) => {
-  return localStorage.getItem('token') ? children : <Navigate to="/login" />;
+  return isTokenValid() ? children : <Navigate to="/login" />;
 };
 
 const AdminRoute = ({ children }) => {
-  if (!localStorage.getItem('token')) return <Navigate to="/login" />;
+  if (!isTokenValid()) return <Navigate to="/login" />;
   if (localStorage.getItem('role') !== 'ADMIN') return <Navigate to="/dashboard" />;
   return children;
 };

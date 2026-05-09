@@ -48,21 +48,28 @@ export default function Tasks() {
   const [projects, setProjects] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [filter, setFilter] = useState('ALL');
+  const [error, setError] = useState('');
   const role = localStorage.getItem('role');
 
   const load = async () => {
-    if (role === 'ADMIN') {
-      // Admin sees all tasks across all projects
-      const ps = await api.get('/projects');
-      setProjects(ps.data);
-      const all = await Promise.all(ps.data.map(p => api.get(`/projects/${p.id}/tasks`)));
-      setTasks(all.flatMap(r => r.data));
-    } else {
-      // Member sees only their assigned tasks
-      const res = await api.get('/tasks/my');
-      setTasks(res.data);
-      const ps = await api.get('/projects');
-      setProjects(ps.data);
+    try {
+      if (role === 'ADMIN') {
+        const [tasksRes, projectsRes] = await Promise.all([
+          api.get('/tasks/all'),
+          api.get('/projects')
+        ]);
+        setTasks(tasksRes.data);
+        setProjects(projectsRes.data);
+      } else {
+        const [tasksRes, projectsRes] = await Promise.all([
+          api.get('/tasks/my'),
+          api.get('/projects')
+        ]);
+        setTasks(tasksRes.data);
+        setProjects(projectsRes.data);
+      }
+    } catch {
+      setError('Failed to load tasks');
     }
   };
 
@@ -107,6 +114,7 @@ export default function Tasks() {
             <button className="btn btn-primary btn-sm" onClick={() => setShowModal(true)}>+ New Task</button>
           )}
         </div>
+        {error && <p className="error" style={{ marginBottom: '1rem' }}>{error}</p>}
 
         {/* Filter */}
         <div style={{ display: 'flex', gap: 8, marginBottom: '1.2rem' }}>

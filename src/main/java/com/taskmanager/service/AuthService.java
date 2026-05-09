@@ -29,8 +29,8 @@ public class AuthService {
             throw new IllegalArgumentException("Email already registered");
         }
 
-        // Use selected role, default to MEMBER if not provided
-        Role role = (request.getRole() != null) ? request.getRole() : Role.MEMBER;
+        // Always assign MEMBER on signup — use promote endpoint to elevate
+        Role role = Role.MEMBER;
 
         User user = User.builder()
                 .name(request.getName())

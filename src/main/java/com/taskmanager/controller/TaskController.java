@@ -26,6 +26,12 @@ public class TaskController {
         return ResponseEntity.ok(taskService.createTask(projectId, request));
     }
 
+    @GetMapping("/tasks/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<TaskResponse>> getAllTasks() {
+        return ResponseEntity.ok(taskService.getAllTasks());
+    }
+
     @GetMapping("/tasks/my")
     public ResponseEntity<List<TaskResponse>> getMyTasks() {
         return ResponseEntity.ok(taskService.getMyTasks());

@@ -5,29 +5,34 @@ import api from '../api';
 export default function Members() {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
-  const currentEmail = JSON.parse(atob(localStorage.getItem('token').split('.')[1])).sub;
+  const [error, setError] = useState('');
+  const token = localStorage.getItem('token');
+  const currentEmail = token ? JSON.parse(atob(token.split('.')[1])).sub : '';
 
-  const load = () => api.get('/users').then(r => setUsers(r.data));
+  const load = async () => {
+    try { const r = await api.get('/users'); setUsers(r.data); }
+    catch { setError('Failed to load users'); }
+  };
   useEffect(() => { load(); }, []);
 
   const promote = async id => {
     if (window.confirm('Promote this user to Admin?')) {
-      await api.post(`/users/${id}/promote`);
-      load();
+      try { await api.post(`/users/${id}/promote`); load(); }
+      catch { setError('Failed to promote user'); }
     }
   };
 
   const demote = async id => {
     if (window.confirm('Demote this admin to Member?')) {
-      await api.post(`/users/${id}/demote`);
-      load();
+      try { await api.post(`/users/${id}/demote`); load(); }
+      catch { setError('Failed to demote user'); }
     }
   };
 
   const remove = async id => {
     if (window.confirm('Delete this user?')) {
-      await api.delete(`/users/${id}`);
-      load();
+      try { await api.delete(`/users/${id}`); load(); }
+      catch { setError('Failed to delete user'); }
     }
   };
 
@@ -47,6 +52,7 @@ export default function Members() {
           <h1>Members</h1>
           <span style={{ fontSize: '0.85rem', color: '#777' }}>{users.length} total users</span>
         </div>
+        {error && <p className="error" style={{ marginBottom: '1rem' }}>{error}</p>}
 
         {/* Stats */}
         <div className="stats" style={{ marginBottom: '1.5rem' }}>

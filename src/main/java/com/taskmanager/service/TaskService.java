@@ -50,6 +50,10 @@ public class TaskService {
         return toResponse(taskRepository.save(task));
     }
 
+    public List<TaskResponse> getAllTasks() {
+        return taskRepository.findAll().stream().map(this::toResponse).toList();
+    }
+
     public List<TaskResponse> getMyTasks() {
         User currentUser = authHelper.getCurrentUser();
         return taskRepository.findByAssigneeId(currentUser.getId())
