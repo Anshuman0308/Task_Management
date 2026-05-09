@@ -108,13 +108,14 @@
                 <executions>
                     <execution>
                         <id>copy-react-build</id>
-                        <phase>process-resources</phase>
+                        <phase>prepare-package</phase>
                         <goals><goal>copy-resources</goal></goals>
                         <configuration>
                             <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>frontend/build</directory>
+                                    <filtering>false</filtering>
                                 </resource>
                             </resources>
                         </configuration>
