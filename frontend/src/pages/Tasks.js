@@ -51,6 +51,7 @@ export default function Tasks() {
   const [users, setUsers] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [filter, setFilter] = useState('ALL');
+  const [memberFilter, setMemberFilter] = useState('ALL');
   const [error, setError] = useState('');
   const role = localStorage.getItem('role');
 
@@ -82,15 +83,19 @@ export default function Tasks() {
   useEffect(() => { load(); }, []);
 
   const create = async form => {
-    if (!form.projectId) return;
-    await api.post(`/projects/${form.projectId}/tasks`, {
-      title: form.title,
-      description: form.description,
-      dueDate: form.dueDate || null,
-      assigneeId: form.assigneeId ? Number(form.assigneeId) : null,
-    });
-    setShowModal(false);
-    load();
+    if (!form.projectId || !form.title) return;
+    try {
+      await api.post(`/projects/${form.projectId}/tasks`, {
+        title: form.title,
+        description: form.description,
+        dueDate: form.dueDate || null,
+        assigneeId: form.assigneeId ? Number(form.assigneeId) : null,
+      });
+      setShowModal(false);
+      load();
+    } catch (e) {
+      setError(e.response?.data?.message || 'Failed to create task');
+    }
   };
 
   const updateStatus = async (taskId, status) => {
@@ -108,7 +113,13 @@ export default function Tasks() {
     return 'badge badge-todo';
   };
 
-  const filtered = filter === 'ALL' ? tasks : tasks.filter(t => t.status === filter);
+  const filtered = (() => {
+    let result = filter === 'ALL' ? tasks : tasks.filter(t => t.status === filter);
+    if (role === 'ADMIN' && memberFilter !== 'ALL') {
+      result = result.filter(t => t.assigneeEmail === memberFilter);
+    }
+    return result;
+  })();
 
   return (
     <>
@@ -122,14 +133,21 @@ export default function Tasks() {
         </div>
         {error && <p className="error" style={{ marginBottom: '1rem' }}>{error}</p>}
 
-        {/* Filter */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: '1.2rem' }}>
+        {/* Filters */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: '1.2rem', flexWrap: 'wrap', alignItems: 'center' }}>
           {['ALL', ...STATUSES].map(s => (
             <button key={s} onClick={() => setFilter(s)}
               className={`btn btn-sm ${filter === s ? 'btn-primary' : 'btn-outline'}`}>
               {s.replace('_', ' ')}
             </button>
           ))}
+          {role === 'ADMIN' && users.length > 0 && (
+            <select value={memberFilter} onChange={e => setMemberFilter(e.target.value)}
+              style={{ fontSize: '0.85rem', padding: '4px 8px', borderRadius: 4, border: '1px solid #ccc', marginLeft: 8 }}>
+              <option value="ALL">All Members</option>
+              {users.map(u => <option key={u.id} value={u.email}>{u.name}</option>)}
+            </select>
+          )}
         </div>
 
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>

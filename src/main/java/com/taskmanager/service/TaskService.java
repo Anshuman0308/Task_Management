@@ -16,6 +16,7 @@ import com.taskmanager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,6 +30,7 @@ public class TaskService {
     private final UserRepository userRepository;
     private final AuthHelper authHelper;
 
+    @Transactional
     public TaskResponse createTask(Long projectId, TaskRequest request) {
         Project project = findProjectById(projectId);
 
@@ -50,16 +52,19 @@ public class TaskService {
         return toResponse(taskRepository.save(task));
     }
 
+    @Transactional(readOnly = true)
     public List<TaskResponse> getAllTasks() {
         return taskRepository.findAll().stream().map(this::toResponse).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<TaskResponse> getMyTasks() {
         User currentUser = authHelper.getCurrentUser();
         return taskRepository.findByAssigneeId(currentUser.getId())
                 .stream().map(this::toResponse).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<TaskResponse> getTasksByProject(Long projectId) {
         findProjectById(projectId);
         return taskRepository.findByProjectId(projectId)
