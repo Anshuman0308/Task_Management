@@ -1,3 +1,5 @@
+Role role = userRepository.count() == 0 ? Role.ADMIN : Role.MEMBER;
+Role role = userRepository.count() == 0 ? Role.ADMIN : Role.MEMBER;
 # Task Management App
 
 A full-stack task management web application with role-based access control (Admin/Member), built with **Spring Boot** (backend) and **React** (frontend).

@@ -29,8 +29,9 @@ public class AuthService {
             throw new IllegalArgumentException("Email already registered");
         }
 
-        // First user gets ADMIN, all subsequent users get MEMBER
-        Role role = userRepository.count() == 0 ? Role.ADMIN : Role.MEMBER;
+        // If no admin exists yet, assign ADMIN — otherwise MEMBER
+        boolean adminExists = userRepository.existsByRole(Role.ADMIN);
+        Role role = adminExists ? Role.MEMBER : Role.ADMIN;
 
         User user = User.builder()
                 .name(request.getName())
