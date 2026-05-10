@@ -4,7 +4,7 @@ import api from '../api';
 
 const STATUSES = ['TODO', 'IN_PROGRESS', 'DONE'];
 
-function TaskModal({ projects, onClose, onSave }) {
+function TaskModal({ projects, users, onClose, onSave }) {
   const [form, setForm] = useState({ title: '', description: '', dueDate: '', assigneeId: '', projectId: '' });
   return (
     <div className="modal-overlay">
@@ -30,9 +30,11 @@ function TaskModal({ projects, onClose, onSave }) {
           <input type="date" value={form.dueDate} onChange={e => setForm({ ...form, dueDate: e.target.value })} />
         </div>
         <div className="form-group">
-          <label>Assignee User ID</label>
-          <input type="number" placeholder="User ID" value={form.assigneeId}
-            onChange={e => setForm({ ...form, assigneeId: e.target.value })} />
+          <label>Assignee</label>
+          <select value={form.assigneeId} onChange={e => setForm({ ...form, assigneeId: e.target.value })}>
+            <option value="">Unassigned</option>
+            {users.map(u => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
+          </select>
         </div>
         <div className="modal-actions">
           <button className="btn btn-outline btn-sm" onClick={onClose}>Cancel</button>
@@ -46,6 +48,7 @@ function TaskModal({ projects, onClose, onSave }) {
 export default function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [users, setUsers] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [filter, setFilter] = useState('ALL');
   const [error, setError] = useState('');
@@ -54,12 +57,14 @@ export default function Tasks() {
   const load = async () => {
     try {
       if (role === 'ADMIN') {
-        const [tasksRes, projectsRes] = await Promise.all([
+        const [tasksRes, projectsRes, usersRes] = await Promise.all([
           api.get('/tasks/all'),
-          api.get('/projects')
+          api.get('/projects'),
+          api.get('/users')
         ]);
         setTasks(tasksRes.data);
         setProjects(projectsRes.data);
+        setUsers(usersRes.data);
       } else {
         const [tasksRes, projectsRes] = await Promise.all([
           api.get('/tasks/my'),
@@ -169,7 +174,7 @@ export default function Tasks() {
             )}
         </div>
       </div>
-      {showModal && <TaskModal projects={projects} onClose={() => setShowModal(false)} onSave={create} />}
+      {showModal && <TaskModal projects={projects} users={users} onClose={() => setShowModal(false)} onSave={create} />}
     </>
   );
 }
