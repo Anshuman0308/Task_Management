@@ -10,6 +10,7 @@ import com.taskmanager.enums.TaskStatus;
 import com.taskmanager.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,6 +23,7 @@ public class DashboardService {
     private final AuthHelper authHelper;
     private final TaskService taskService;
 
+    @Transactional(readOnly = true)
     public DashboardResponse getDashboard() {
         User user = authHelper.getCurrentUser();
 
