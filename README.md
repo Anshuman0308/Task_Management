@@ -95,19 +95,19 @@ cd task-management
 
 ### 2. Configure Environment Variables
 
-Copy `.env.example` to `.env` and fill in your values:
-
-```bash
-cp .env.example .env
-```
+A `.env` file has been created with local runnable credentials. If you need to customize it, edit the `.env` file:
 
 ```env
 DB_URL=jdbc:mysql://localhost:3306/task_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
 DB_USERNAME=root
-DB_PASSWORD=yourpassword
-JWT_SECRET=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+DB_PASSWORD=<your-db-password>
+JWT_SECRET=<your-base64-encoded-256bit-secret>
 JWT_EXPIRATION=86400000
+CORS_ALLOWED_ORIGIN=http://localhost:3000
+REACT_APP_API_URL=http://localhost:8080/api
 ```
+
+**Note:** Set your MySQL password in `DB_PASSWORD` and generate a secure JWT secret for `JWT_SECRET`.
 
 ---
 
@@ -121,14 +121,10 @@ JWT_EXPIRATION=86400000
 
 #### Option B — Terminal
 ```bash
-export DB_URL=jdbc:mysql://localhost:3306/task_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
-export DB_USERNAME=root
-export DB_PASSWORD=yourpassword
-export JWT_SECRET=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-export JWT_EXPIRATION=86400000
-
 mvn spring-boot:run
 ```
+
+The application will automatically read environment variables from the `.env` file.
 
 Backend runs on → `http://localhost:8080`
 
