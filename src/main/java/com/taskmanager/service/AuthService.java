@@ -31,6 +31,7 @@ public class AuthService {
 
         // First user gets ADMIN, all subsequent users get MEMBER
         Role role = userRepository.count() == 0 ? Role.ADMIN : Role.MEMBER;
+        System.out.println("Creating user with role: " + role + ", total users: " + userRepository.count());
 
         User user = User.builder()
                 .name(request.getName())
@@ -40,6 +41,7 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
+        System.out.println("User created: " + user.getEmail() + " with role " + user.getRole());
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         String token = jwtUtil.generateToken(userDetails);
@@ -69,14 +71,19 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+            );
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
-        String token = jwtUtil.generateToken(userDetails);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
+            String token = jwtUtil.generateToken(userDetails);
 
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
-        return new AuthResponse(token, user.getEmail(), user.getRole());
+            User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+            return new AuthResponse(token, user.getEmail(), user.getRole());
+        } catch (Exception e) {
+            System.err.println("Login failed for " + request.getEmail() + ": " + e.getMessage());
+            throw e;
+        }
     }
 }
