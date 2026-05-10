@@ -11,7 +11,7 @@ export default function Signup() {
     e.preventDefault();
     setError('');
     try {
-      const { data } = await api.post('/auth/signup', form);
+      const { data } = await api.post('/auth/signup', { name: form.name, email: form.email, password: form.password });
       localStorage.setItem('token', data.token);
       localStorage.setItem('role', data.role);
       navigate('/dashboard');

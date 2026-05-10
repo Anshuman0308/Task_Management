@@ -11,7 +11,7 @@ export default function Login() {
     e.preventDefault();
     setError('');
     try {
-      const { data } = await api.post('/auth/login', form);
+      const { data } = await api.post('/auth/login', { email: form.email, password: form.password });
       localStorage.setItem('token', data.token);
       localStorage.setItem('role', data.role);
       navigate('/dashboard');
