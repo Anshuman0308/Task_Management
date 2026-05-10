@@ -14,6 +14,7 @@ import com.taskmanager.repository.ProjectRepository;
 import com.taskmanager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class ProjectService {
     private final UserRepository userRepository;
     private final AuthHelper authHelper;
 
+    @Transactional
     public ProjectResponse createProject(ProjectRequest request) {
         User owner = authHelper.getCurrentUser();
 
@@ -48,6 +50,7 @@ public class ProjectService {
         return toResponse(project);
     }
 
+    @Transactional
     public List<ProjectResponse> getMyProjects() {
         User user = authHelper.getCurrentUser();
 
@@ -58,6 +61,7 @@ public class ProjectService {
                 .stream().map(this::toResponse).toList();
     }
 
+    @Transactional
     public ProjectResponse getProject(Long projectId) {
         return toResponse(findProjectById(projectId));
     }
