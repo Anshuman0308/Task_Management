@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
 
 export default function Login() {
-  const [form, setForm] = useState({ role: 'MEMBER', email: '', password: '' });
+  const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -26,13 +26,6 @@ export default function Login() {
         <h2>Sign In</h2>
         <form onSubmit={submit}>
           <div className="form-group">
-            <label>Role</label>
-            <select value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}>
-              <option value="MEMBER">Member</option>
-              <option value="ADMIN">Admin</option>
-            </select>
-          </div>
-          <div className="form-group">
             <label>Email</label>
             <input type="email" placeholder="you@example.com" value={form.email}
               onChange={e => setForm({ ...form, email: e.target.value })} required />
@@ -44,7 +37,7 @@ export default function Login() {
           </div>
           {error && <p className="error">{error}</p>}
           <button className="btn btn-primary btn-full" style={{ marginTop: '0.5rem' }}>
-            Sign In as {form.role}
+            Sign In
           </button>
         </form>
         <p>No account? <Link to="/signup">Sign up</Link></p>
