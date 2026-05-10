@@ -13,6 +13,7 @@ A full-stack task management web application with role-based access control (Adm
 | Database | MySQL + Spring Data JPA |
 | Frontend | React 18, React Router, Axios |
 | Build Tool | Maven |
+| Deployment | Railway |
 
 ---
 
@@ -20,9 +21,11 @@ A full-stack task management web application with role-based access control (Adm
 
 - JWT-based authentication (Signup / Login)
 - Role-based access control — **Admin** and **Member**
+- First user to sign up automatically gets **Admin** role
 - Project creation and team management
-- Task creation, assignment and status tracking
-- Dashboard with task stats and overdue detection
+- Task creation with assignee dropdown and project selection
+- Task status tracking with member filter (Admin)
+- Member dashboard — projects with tasks, stats, status updates
 - Member list with promote / demote / delete (Admin only)
 - Environment variable based configuration
 
@@ -65,9 +68,11 @@ task-management/
 | Create / Delete project | ✅ | ❌ |
 | Add members to project | ✅ | ❌ |
 | Create / Delete task | ✅ | ❌ |
+| Assign task to member | ✅ | ❌ |
 | Update any task | ✅ | ❌ |
 | Update own task status | ✅ | ✅ |
-| View dashboard | All tasks | Own tasks only |
+| View dashboard | All tasks | Own tasks + projects |
+| Filter tasks by member | ✅ | ❌ |
 | View members list | ✅ | ❌ |
 | Promote / Demote members | ✅ | ❌ |
 
@@ -87,15 +92,15 @@ task-management/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/task-management.git
-cd task-management
+git clone https://github.com/Anshuman0308/Task_Management.git
+cd Task_Management
 ```
 
 ---
 
 ### 2. Configure Environment Variables
 
-A `.env` file has been created with local runnable credentials. If you need to customize it, edit the `.env` file:
+Edit the `.env` file:
 
 ```env
 DB_URL=jdbc:mysql://localhost:3306/task_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
@@ -103,11 +108,9 @@ DB_USERNAME=root
 DB_PASSWORD=<your-db-password>
 JWT_SECRET=<your-base64-encoded-256bit-secret>
 JWT_EXPIRATION=86400000
-CORS_ALLOWED_ORIGIN=http://localhost:3000
-REACT_APP_API_URL=http://localhost:8080/api
+CORS_ALLOWED_ORIGIN=http://localhost:8080
+REACT_APP_API_URL=/api
 ```
-
-**Note:** Set your MySQL password in `DB_PASSWORD` and generate a secure JWT secret for `JWT_SECRET`.
 
 ---
 
@@ -123,8 +126,6 @@ REACT_APP_API_URL=http://localhost:8080/api
 ```bash
 mvn spring-boot:run
 ```
-
-The application will automatically read environment variables from the `.env` file.
 
 Backend runs on → `http://localhost:8080`
 
@@ -146,7 +147,7 @@ Frontend runs on → `http://localhost:3000`
 
 ### Auth
 ```
-POST /api/auth/signup       Register a new user
+POST /api/auth/signup       Register a new user (first = ADMIN, rest = MEMBER)
 POST /api/auth/login        Login and get JWT token
 POST /api/auth/promote      Promote user to Admin by email  [ADMIN]
 ```
@@ -164,6 +165,7 @@ DELETE /api/projects/{id}         Delete project             [ADMIN]
 ```
 GET    /api/projects/{id}/tasks   List tasks in project
 POST   /api/projects/{id}/tasks   Create task                [ADMIN]
+GET    /api/tasks/all             Get all tasks              [ADMIN]
 GET    /api/tasks/my              Get my assigned tasks      [MEMBER]
 PUT    /api/tasks/{id}            Update task                [ADMIN]
 PATCH  /api/tasks/{id}/status     Update task status         [ALL]
@@ -193,9 +195,9 @@ DELETE /api/users/{id}         Delete user                  [ADMIN]
 |---|---|---|
 | `/login` | Sign In | Public |
 | `/signup` | Create Account | Public |
-| `/dashboard` | Stats + Task list | All |
+| `/dashboard` | Stats + Projects + Tasks | All |
 | `/projects` | Project management | All |
-| `/tasks` | Task list | All |
+| `/tasks` | Task list with member filter | All |
 | `/members` | Member management | Admin only |
 
 ---
@@ -227,6 +229,7 @@ tasks
 | `DB_PASSWORD` | MySQL password | `yourpassword` |
 | `JWT_SECRET` | Base64 encoded secret key (min 256-bit) | `404E6352...` |
 | `JWT_EXPIRATION` | Token expiry in milliseconds | `86400000` (24h) |
+| `CORS_ALLOWED_ORIGIN` | Allowed CORS origin | `http://localhost:8080` |
 
 ---
 
@@ -249,4 +252,4 @@ tasks
 - JWT tokens are signed with HMAC-SHA256
 - Role is embedded in JWT — cannot be tampered from frontend
 - `.env` is excluded from git via `.gitignore`
-- CORS is restricted to `http://localhost:3000`
+- `spring.jpa.open-in-view` is disabled for better performance
