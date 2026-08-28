@@ -1,5 +1,5 @@
 export const getUser = () => {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   if (!token) return null;
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -10,7 +10,7 @@ export const getUser = () => {
 };
 
 export const logout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('role');
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('role');
   window.location.href = '/login';
 };
