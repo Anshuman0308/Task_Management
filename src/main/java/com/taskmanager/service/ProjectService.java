@@ -69,10 +69,10 @@ public class ProjectService {
     public void addMember(Long projectId, AddMemberRequest request) {
         Project project = findProjectById(projectId);
 
-        User newMember = userRepository.findById(request.getUserId())
+        User newMember = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "User not found: " + request.getUserId()
+                                "User not found: " + request.getEmail()
                         ));
 
         if (projectMemberRepository.existsByUserIdAndProjectId(

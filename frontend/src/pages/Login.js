@@ -12,8 +12,8 @@ export default function Login() {
     setError('');
     try {
       const { data } = await api.post('/auth/login', { email: form.email, password: form.password });
-      sessionStorage.setItem('token', data.token);
-      sessionStorage.setItem('role', data.role);
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('role', data.role);
       navigate('/dashboard');
     } catch {
       setError('Invalid email or password');

@@ -27,21 +27,15 @@ function Modal({ onClose, onSave }) {
 }
 
 function MemberModal({ projectId, onClose }) {
-  const [userId, setUserId] = useState('');
+  const [email, setEmail] = useState('');
   const [msg, setMsg] = useState('');
 
   const add = async () => {
-    if (!userId) {
-      setMsg('Please enter a user ID');
-      return;
-    }
-
+    if (!email) { setMsg('Please enter an email'); return; }
     try {
-      await api.post(`/projects/${projectId}/members`, {
-        userId: Number(userId)
-      });
-
+      await api.post(`/projects/${projectId}/members`, { email });
       setMsg('Member added!');
+      setEmail('');
     } catch (e) {
       setMsg(e.response?.data?.error || 'Error adding member');
     }
@@ -51,48 +45,23 @@ function MemberModal({ projectId, onClose }) {
     <div className="modal-overlay">
       <div className="modal">
         <h3>Add Member</h3>
-
         <div className="form-group">
-          <label>Member ID</label>
+          <label>Member Email</label>
           <input
-            type="number"
-            min="1"
-            value={userId}
-            onChange={e => setUserId(e.target.value)}
-            placeholder="Enter member ID"
+            type="email"
+            placeholder="user@example.com"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
           />
         </div>
-
-        {msg && (
-          <p
-            style={{
-              fontSize: '0.85rem',
-              color: msg === 'Member added!' ? 'green' : 'red'
-            }}
-          >
-            {msg}
-          </p>
-        )}
-
+        {msg && <p style={{ fontSize: '0.85rem', color: msg === 'Member added!' ? 'green' : 'red' }}>{msg}</p>}
         <div className="modal-actions">
-          <button
-            className="btn btn-outline btn-sm"
-            onClick={onClose}
-          >
-            Close
-          </button>
-
-          <button
-            className="btn btn-primary btn-sm"
-            onClick={add}
-          >
-            Add
-          </button>
+          <button className="btn btn-outline btn-sm" onClick={onClose}>Close</button>
+          <button className="btn btn-primary btn-sm" onClick={add}>Add</button>
         </div>
       </div>
     </div>
   );
-}
 }
 
 export default function Projects() {
