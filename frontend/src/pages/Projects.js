@@ -27,32 +27,72 @@ function Modal({ onClose, onSave }) {
 }
 
 function MemberModal({ projectId, onClose }) {
-  const [email, setEmail] = useState('');
+  const [userId, setUserId] = useState('');
   const [msg, setMsg] = useState('');
+
   const add = async () => {
+    if (!userId) {
+      setMsg('Please enter a user ID');
+      return;
+    }
+
     try {
-      await api.post(`/projects/${projectId}/members`, { email });
+      await api.post(`/projects/${projectId}/members`, {
+        userId: Number(userId)
+      });
+
       setMsg('Member added!');
     } catch (e) {
       setMsg(e.response?.data?.error || 'Error adding member');
     }
   };
+
   return (
     <div className="modal-overlay">
       <div className="modal">
         <h3>Add Member</h3>
+
         <div className="form-group">
-          <label>Member Email</label>
-          <input type="email" value={email} onChange={e => setEmail(e.target.value)} />
+          <label>Member ID</label>
+          <input
+            type="number"
+            min="1"
+            value={userId}
+            onChange={e => setUserId(e.target.value)}
+            placeholder="Enter member ID"
+          />
         </div>
-        {msg && <p style={{ fontSize: '0.85rem', color: msg === 'Member added!' ? 'green' : 'red' }}>{msg}</p>}
+
+        {msg && (
+          <p
+            style={{
+              fontSize: '0.85rem',
+              color: msg === 'Member added!' ? 'green' : 'red'
+            }}
+          >
+            {msg}
+          </p>
+        )}
+
         <div className="modal-actions">
-          <button className="btn btn-outline btn-sm" onClick={onClose}>Close</button>
-          <button className="btn btn-primary btn-sm" onClick={add}>Add</button>
+          <button
+            className="btn btn-outline btn-sm"
+            onClick={onClose}
+          >
+            Close
+          </button>
+
+          <button
+            className="btn btn-primary btn-sm"
+            onClick={add}
+          >
+            Add
+          </button>
         </div>
       </div>
     </div>
   );
+}
 }
 
 export default function Projects() {

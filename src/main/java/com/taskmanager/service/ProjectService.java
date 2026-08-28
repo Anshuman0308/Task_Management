@@ -65,15 +65,21 @@ public class ProjectService {
     public ProjectResponse getProject(Long projectId) {
         return toResponse(findProjectById(projectId));
     }
-
+@Transactional
     public void addMember(Long projectId, AddMemberRequest request) {
         Project project = findProjectById(projectId);
 
-        User newMember = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + request.getEmail()));
+        User newMember = userRepository.findById(request.getUserId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found: " + request.getUserId()
+                        ));
 
-        if (projectMemberRepository.existsByUserIdAndProjectId(newMember.getId(), projectId)) {
-            throw new IllegalArgumentException("User is already a member of this project");
+        if (projectMemberRepository.existsByUserIdAndProjectId(
+                newMember.getId(), projectId)) {
+            throw new IllegalArgumentException(
+                    "User is already a member of this project"
+            );
         }
 
         ProjectMember member = ProjectMember.builder()
